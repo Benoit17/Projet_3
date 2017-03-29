@@ -23,3 +23,8 @@ $app->register(new Silex\Provider\DoctrineServiceProvider());
 $app['dao.billet'] = function ($app) {
     return new Projet_3\DAO\BilletDAO($app['db']);
 };
+$app['dao.comment'] = function ($app) {
+    $commentDAO = new Projet_3\DAO\CommentDAO($app['db']);
+    $commentDAO->setBilletDAO($app['dao.billet']);
+    return $commentDAO;
+};

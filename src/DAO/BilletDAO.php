@@ -2,27 +2,10 @@
 
 namespace Projet_3\DAO;
 
-use Doctrine\DBAL\Connection;
 use Projet_3\Domain\Billet;
 
-class BilletDAO
+class BilletDAO extends DAO
 {
-    /**
-     * Database connection
-     *
-     * @var \Doctrine\DBAL\Connection
-     */
-    private $db;
-
-    /**
-     * Constructor
-     *
-     * @param \Doctrine\DBAL\Connection The database connection object
-     */
-    public function __construct(Connection $db) {
-        $this->db = $db;
-    }
-
     /**
      * Return a list of all billets, sorted by date (most recent first).
      *
@@ -30,15 +13,32 @@ class BilletDAO
      */
     public function findAll() {
         $sql = "select * from t_billet order by billet_id desc";
-        $result = $this->db->fetchAll($sql);
+        $result = $this->getDb()->fetchAll($sql);
 
         // Convert query result to an array of domain objects
         $billets = array();
         foreach ($result as $row) {
             $billetId = $row['billet_id'];
-            $billets[$billetId] = $this->buildBillet($row);
+            $billets[$billetId] = $this->buildDomainObject($row);
         }
         return $billets;
+    }
+
+    /**
+     * Returns an billet matching the supplied id.
+     *
+     * @param integer $id
+     *
+     * @return \Projet_3\Domain\Billet|throws an exception if no matching billet is found
+     */
+    public function find($id) {
+        $sql = "select * from t_billet where billet_id=?";
+        $row = $this->getDb()->fetchAssoc($sql, array($id));
+
+        if ($row)
+            return $this->buildDomainObject($row);
+        else
+            throw new \Exception("No billet matching id " . $id);
     }
 
     /**
@@ -47,7 +47,7 @@ class BilletDAO
      * @param array $row The DB row containing Billet data.
      * @return \Projet_3\Domain\Billet
      */
-    private function buildBillet(array $row) {
+    protected function buildDomainObject(array $row) {
         $billet = new Billet();
         $billet->setId($row['billet_id']);
         $billet->setTitle($row['billet_title']);
