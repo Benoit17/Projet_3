@@ -14,9 +14,8 @@ $app->get('/', function () use ($app) {
 // Billet details with comments
 $app->match('/billet/{id}', function ($id, Request $request) use ($app) {
     $billet = $app['dao.billet']->find($id);
-    $commentFormView = null;
-    if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
-        // A user is fully authenticated : he can add comments
+
+        // An user can add comments
         $comment = new Comment();
         $comment->setBillet($billet);
         $user = $app['user'];
@@ -28,7 +27,7 @@ $app->match('/billet/{id}', function ($id, Request $request) use ($app) {
             $app['session']->getFlashBag()->add('success', 'Your comment was successfully added.');
         }
         $commentFormView = $commentForm->createView();
-    }
+
     $comments = $app['dao.comment']->findAllByBillet($id);
 
     return $app['twig']->render('billet.html.twig', array(
