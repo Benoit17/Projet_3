@@ -15,6 +15,23 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
 $app->register(new Silex\Provider\AssetServiceProvider(), array(
     'assets.version' => 'v1'
 ));
+$app->register(new Silex\Provider\SessionServiceProvider());
+$app->register(new Silex\Provider\SecurityServiceProvider(), array(
+    'security.firewalls' => array(
+        'secured' => array(
+            'pattern' => '^/',
+            'anonymous' => true,
+            'logout' => true,
+            'form' => array('login_path' => '/login', 'check_path' => '/login_check'),
+            'users' => function () use ($app) {
+                return new Projet_3\DAO\UserDAO($app['db']);
+            },
+        ),
+    ),
+));
+$app->register(new Silex\Provider\FormServiceProvider());
+$app->register(new Silex\Provider\LocaleServiceProvider());
+$app->register(new Silex\Provider\TranslationServiceProvider());
 
 // Register service providers.
 $app->register(new Silex\Provider\DoctrineServiceProvider());
@@ -23,8 +40,12 @@ $app->register(new Silex\Provider\DoctrineServiceProvider());
 $app['dao.billet'] = function ($app) {
     return new Projet_3\DAO\BilletDAO($app['db']);
 };
+$app['dao.user'] = function ($app) {
+    return new Projet_3\DAO\UserDAO($app['db']);
+};
 $app['dao.comment'] = function ($app) {
     $commentDAO = new Projet_3\DAO\CommentDAO($app['db']);
     $commentDAO->setBilletDAO($app['dao.billet']);
+    $commentDAO->setUserDAO($app['dao.user']);
     return $commentDAO;
 };
