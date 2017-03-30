@@ -33,9 +33,6 @@ $app->register(new Silex\Provider\FormServiceProvider());
 $app->register(new Silex\Provider\LocaleServiceProvider());
 $app->register(new Silex\Provider\TranslationServiceProvider());
 
-// Register service providers.
-$app->register(new Silex\Provider\DoctrineServiceProvider());
-
 // Register services.
 $app['dao.billet'] = function ($app) {
     return new Projet_3\DAO\BilletDAO($app['db']);
