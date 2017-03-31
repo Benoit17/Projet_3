@@ -3,6 +3,8 @@
 use Symfony\Component\HttpFoundation\Request;
 use Projet_3\Domain\Comment;
 use Projet_3\Form\Type\CommentType;
+use Projet_3\Domain\User;
+use Projet_3\Form\Type\UserType;
 
 // Home page
 $app->get('/', function () use ($app) {
@@ -14,7 +16,8 @@ $app->get('/', function () use ($app) {
 // Billet details with comments
 $app->match('/billet/{id}', function ($id, Request $request) use ($app) {
     $billet = $app['dao.billet']->find($id);
-
+    $commentFormView = null;
+    if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
         // An user can add comments
         $comment = new Comment();
         $comment->setBillet($billet);
@@ -27,7 +30,7 @@ $app->match('/billet/{id}', function ($id, Request $request) use ($app) {
             $app['session']->getFlashBag()->add('success', 'Your comment was successfully added.');
         }
         $commentFormView = $commentForm->createView();
-
+    }
     $comments = $app['dao.comment']->findAllByBillet($id);
 
     return $app['twig']->render('billet.html.twig', array(
@@ -43,3 +46,28 @@ $app->get('/login', function(Request $request) use ($app) {
         'last_username' => $app['session']->get('_security.last_username'),
     ));
 })->bind('login');
+
+// Registration form
+$app->match('/registration', function(Request $request) use ($app) {
+    $user = new User();
+    $userForm = $app['form.factory']->create(UserType::class, $user);
+    $userForm->handleRequest($request);
+    if ($userForm->isSubmitted() && $userForm->isValid()) {
+        // generate a random salt value
+        $salt = substr(md5(time()), 0, 23);
+        $user->setSalt($salt);
+        $plainPassword = $user->getPassword();
+        // find the default encoder
+        $encoder = $app['security.encoder.bcrypt'];
+        // compute the encoded password
+        $password = $encoder->encodePassword($plainPassword, $user->getSalt());
+        $user->setPassword($password);
+        $app['dao.user']->save($user);
+        $app['session']->getFlashBag()->add('success', 'Thank you and good read!.');
+
+
+    }
+    return $app['twig']->render('user_form.html.twig', array(
+        'title' => 'New user',
+        'userForm' => $userForm->createView()));
+})->bind('registration');
