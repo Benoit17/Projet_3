@@ -3,6 +3,7 @@
 use Symfony\Component\HttpFoundation\Request;
 use Projet_3\Domain\Comment;
 use Projet_3\Form\Type\CommentType;
+use Projet_3\Form\Type\AnswerType;
 use Projet_3\Domain\User;
 use Projet_3\Form\Type\UserType;
 
@@ -31,12 +32,28 @@ $app->match('/billet/{id}', function ($id, Request $request) use ($app) {
         }
         $commentFormView = $commentForm->createView();
     }
+    $answerFormView = null;
+    if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
+        // An user can answer
+        $comment = new Comment();
+        $comment->setBillet($billet);
+        $user = $app['user'];
+        $comment->setAuthor($user);
+        $answerForm = $app['form.factory']->create(AnswerType::class, $comment);
+        $answerForm->handleRequest($request);
+        if ($answerForm->isSubmitted() && $answerForm->isValid()) {
+            $app['dao.comment']->save($comment);
+            $app['session']->getFlashBag()->add('success', 'Your comment was successfully added.');
+        }
+        $answerFormView = $answerForm->createView();
+    }
     $comments = $app['dao.comment']->findAllByBillet($id);
 
     return $app['twig']->render('billet.html.twig', array(
         'billet' => $billet,
         'comments' => $comments,
-        'commentForm' => $commentFormView));
+        'commentForm' => $commentFormView,
+        'answerForm' => $answerFormView));
 })->bind('billet');
 
 // Login form
