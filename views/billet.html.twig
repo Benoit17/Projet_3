@@ -9,33 +9,31 @@
 
     <h3>Comments</h3>
     {% for comment in comments %}
-        <strong>{{ comment.author.username }}</strong> said : {{ comment.content }}<br>
-        <!-- les boutons d'actions -->
-        <a class="btn btn-primary" href="#Answer" data-toggle="collapse" aria-expanded="false" aria-controls="MonCollapse">Answer</a>
-        <!-- le contenu masqué -->
-        <div id="Answer" class="collapse">
-            {% if answerForm %}
-                {{ form_start(answerForm) }}
-                <div class="form-group">
-                    {{ form_errors(answerForm.content) }}
-                    {{ form_widget(answerForm.content, { 'attr':  {
-                        'rows': '4',
-                        'class': 'form-control',
-                        'placeholder': 'Enter your comment'
-                    }}) }}
-                </div>
-                <div class="form-group">
-                    <input type="submit" class="btn btn-primary" value="Publish comment" />
-                </div>
-                {{ form_end(answerForm) }}
-                {% for flashMessage in app.session.flashbag.get('success') %}
-                    <div class="alert alert-success">
-                        {{ flashMessage }}
+        <div class="panel panel-default" id=""comment-{{ comment.id }}>
+            <strong>{{ comment.author.username }}</strong> said : {{ comment.content }}<br>
+            <a class="btn btn-primary">Answer</a>
+                {% if answerForm %}
+                    {{ form_start(answerForm) }}
+                    <div class="form-group">
+                        {{ form_errors(answerForm.content) }}
+                        {{ form_widget(answerForm.content, { 'attr':  {
+                            'rows': '4',
+                            'class': 'form-control',
+                            'placeholder': 'Enter your comment'
+                        }}) }}
                     </div>
-                {% endfor %}
-            {% else %}
-                <a href="{{ path('login') }} ">Log in</a> to add comments.
-            {% endif %}
+                    <div class="form-group">
+                        <input type="submit" class="btn btn-primary reply" value="Publish comment" data-id=""{{ comment.id }} />
+                    </div>
+                    {{ form_end(answerForm) }}
+                    {% for flashMessage in app.session.flashbag.get('success') %}
+                        <div class="alert alert-success">
+                            {{ flashMessage }}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <a href="{{ path('login') }} ">Log in</a> to add comments.
+                {% endif %}
         </div>
     {% else %}
         No comments yet.

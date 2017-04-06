@@ -12,7 +12,7 @@ class CommentDAO extends DAO
     private $billetDAO;
 
     /**
-     * @var \MicroCMS\DAO\UserDAO
+     * @var \Projet_3\DAO\UserDAO
      */
     private $userDAO;
 
@@ -102,6 +102,69 @@ class CommentDAO extends DAO
             $id = $this->getDb()->lastInsertId();
             $comment->setId($id);
         }
+    }
+
+    /**
+     * Returns a list of all comments, sorted by date (most recent first).
+     *
+     * @return array A list of all comments.
+     */
+    public function findAll() {
+        $sql = "select * from t_comment order by com_id desc";
+        $result = $this->getDb()->fetchAll($sql);
+
+        // Convert query result to an array of domain objects
+        $entities = array();
+        foreach ($result as $row) {
+            $id = $row['com_id'];
+            $entities[$id] = $this->buildDomainObject($row);
+        }
+        return $entities;
+    }
+
+    /**
+     * Removes all comments for an billet
+     *
+     * @param $billetId The id of the billet
+     */
+    public function deleteAllByBillet($billetId) {
+        $this->getDb()->delete('t_comment', array('billet_id' => $billetId));
+    }
+
+    /**
+     * Returns a comment matching the supplied id.
+     *
+     * @param integer $id The comment id
+     *
+     * @return \Projet_3\Domain\Comment|throws an exception if no matching comment is found
+     */
+    public function find($id) {
+        $sql = "select * from t_comment where com_id=?";
+        $row = $this->getDb()->fetchAssoc($sql, array($id));
+
+        if ($row)
+            return $this->buildDomainObject($row);
+        else
+            throw new \Exception("No comment matching id " . $id);
+    }
+
+    /**
+     * Removes a comment from the database.
+     *
+     * @param @param integer $id The comment id
+     */
+    public function delete($id) {
+        // Delete the comment
+        $this->getDb()->delete('t_comment', array('com_id' => $id));
+    }
+
+    /**
+     * Removes all comments for a user
+     *
+     * @param integer $userId The id of the user
+     */
+    public function deleteAllByUser($userId) {
+        $this->getDb()->delete('t_comment', array('usr_id' => $userId));
     }
 }
 

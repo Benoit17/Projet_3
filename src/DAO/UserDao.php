@@ -87,7 +87,7 @@ class UserDAO extends DAO implements UserProviderInterface
             'usr_name' => $user->getUsername(),
             'usr_salt' => $user->getSalt(),
             'usr_password' => $user->getPassword(),
-            'usr_role' => 'ROLE_USER'
+            'usr_role' => $user->getRole()
         );
 
         if ($user->getId()) {
@@ -100,5 +100,33 @@ class UserDAO extends DAO implements UserProviderInterface
             $id = $this->getDb()->lastInsertId();
             $user->setId($id);
         }
+    }
+
+    /**
+     * Returns a list of all users, sorted by role and name.
+     *
+     * @return array A list of all users.
+     */
+    public function findAll() {
+        $sql = "select * from t_user order by usr_role, usr_name";
+        $result = $this->getDb()->fetchAll($sql);
+
+        // Convert query result to an array of domain objects
+        $entities = array();
+        foreach ($result as $row) {
+            $id = $row['usr_id'];
+            $entities[$id] = $this->buildDomainObject($row);
+        }
+        return $entities;
+    }
+
+    /**
+     * Removes a user from the database.
+     *
+     * @param @param integer $id The user id.
+     */
+    public function delete($id) {
+        // Delete the user
+        $this->getDb()->delete('t_user', array('usr_id' => $id));
     }
 }
