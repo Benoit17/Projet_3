@@ -25,7 +25,7 @@ class AnswerDAO extends DAO
     }
 
     /**
-     * Return a list of all answers for a oomment, sorted by date (most recent last).
+     * Return a list of all answers for a comment, sorted by date (most recent last).
      *
      * @param integer $commentId The comment id.
      *

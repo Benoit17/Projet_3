@@ -58,3 +58,9 @@ $app['dao.comment'] = function ($app) {
     $commentDAO->setUserDAO($app['dao.user']);
     return $commentDAO;
 };
+$app['dao.answer'] = function ($app) {
+    $answerDAO = new Projet_3\DAO\AnswerDAO($app['db']);
+    $answerDAO->setCommentDAO($app['dao.comment']);
+    $answerDAO->setUserDAO($app['dao.user']);
+    return $answerDAO;
+};

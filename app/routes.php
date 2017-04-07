@@ -4,6 +4,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Projet_3\Domain\Comment;
 use Projet_3\Domain\Billet;
 use Projet_3\Domain\User;
+use Projet_3\Domain\Answer;
 use Projet_3\Form\Type\CommentType;
 use Projet_3\Form\Type\BilletType;
 use Projet_3\Form\Type\AnswerType;
@@ -38,14 +39,13 @@ $app->match('/billet/{id}', function ($id, Request $request) use ($app) {
     $answerFormView = null;
     if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
         // An user can answer
-        $comment = new Comment();
-        $comment->setBillet($billet);
+        $answer = new Answer();
         $user = $app['user'];
-        $comment->setAuthor($user);
-        $answerForm = $app['form.factory']->create(AnswerType::class, $comment);
+        $answer->setAuthor($user);
+        $answerForm = $app['form.factory']->create(AnswerType::class, $answer);
         $answerForm->handleRequest($request);
         if ($answerForm->isSubmitted() && $answerForm->isValid()) {
-            $app['dao.comment']->save($comment);
+            $app['dao.answer']->save($answer);
             $app['session']->getFlashBag()->add('success', 'Your comment was successfully added.');
         }
         $answerFormView = $answerForm->createView();

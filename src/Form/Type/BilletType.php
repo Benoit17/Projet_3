@@ -21,3 +21,4 @@ class BilletType extends AbstractType
         return 'billet';
     }
 }
+
