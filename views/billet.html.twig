@@ -11,35 +11,16 @@
     {% for comment in comments %}
         <div class="panel panel-default">
             <strong>{{ comment.author.username }}</strong> said : {{ comment.content }}<br>
-            <!-- les boutons d'actions -->
-            <a class="btn btn-primary" href="#{{ comment.id }}" data-toggle="collapse" aria-expanded="false">Answer</a>
-            <!-- le contenu masqué -->
-            <section id="{{ comment.id }}" class="collapse">
-                {% if answerForm %}
-                    {{ form_start(answerForm) }}
-                    <div class="form-group">
-                        {{ form_errors(answerForm.content) }}
-                        {{ form_widget(answerForm.content, { 'attr':  {
-                            'rows': '4',
-                            'class': 'form-control',
-                            'placeholder': 'Enter your answer'
-                        }}) }}
-                    </div>
-                    <div class="form-group">
-                        <input type="submit" class="btn btn-primary reply" value="Publish comment"/>
-                    </div>
-                    {{ form_end(answerForm) }}
-                </section>
-                    {% for flashMessage in app.session.flashbag.get('success') %}
-                        <div class="alert alert-success">
-                            {{ flashMessage }}
-                        </div>
-                    {% endfor %}
-
-                {% else %}
-                    <a href="{{ path('login') }} ">Log in</a> to add comments.
-                {% endif %}
+            <p class="text-right"><a href="{{ path('comment_answer', { 'id': comment.id }) }}"><button type="button" class="btn btn-primary"></span> Répondre </button></a></p>
         </div>
+        {% for answer in answers %}
+            {% if comment.id == answer.comment.id %}
+                <div class="panel panel-default, answer">
+                    <strong>{{ answer.author.username }}</strong> said : {{ answer.content }}<br>
+                    <p class="text-right"><a href="{{ path('comment_answer', { 'id': comment.id }) }}"><button type="button" class="btn btn-primary"> Répondre </button></a></p>
+                </div>
+            {% endif %}
+        {% endfor %}
     {% else %}
         No comments yet.
     {% endfor %}
@@ -69,3 +50,6 @@
     {% endif %}
     </p>
 {% endblock %}
+
+
+

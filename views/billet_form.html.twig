@@ -10,7 +10,6 @@
             {{ flashMessage }}
         </div>
     {% endfor %}
-
     <div class="well">
         {{ form_start(billetForm, { 'attr': {'class': 'form-horizontal'} }) }}
         <div class="form-group">
@@ -36,9 +35,6 @@
                 }}) }}
             </div>
         </div>
-        <form method="post">
-            <textarea id="mytextarea">Hello, World!</textarea>
-        </form>
         <div class="form-group">
             <div class="col-sm-offset-4 col-sm-3">
                 <input type="submit" class="btn btn-primary" value="Save" />
@@ -46,6 +42,5 @@
         </div>
         {{ form_end(billetForm) }}
     </div>
-
 {% endblock %}
 

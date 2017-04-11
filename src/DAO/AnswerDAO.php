@@ -80,6 +80,24 @@ class AnswerDAO extends DAO
     }
 
     /**
+     * Return a list of all answers, sorted by date (most recent first).
+     *
+     * @return array A list of all answers.
+     */
+    public function findAll() {
+        $sql = "select * from t_answer order by com_id desc";
+        $result = $this->getDb()->fetchAll($sql);
+
+        // Convert query result to an array of domain objects
+        $answers = array();
+        foreach ($result as $row) {
+            $answerId = $row['answer_id'];
+            $answers[$answerId] = $this->buildDomainObject($row);
+        }
+        return $answers;
+    }
+
+    /**
      * Saves a answer into the database.
      *
      * @param \Projet_3\Domain\Answer $answer The answer to save
@@ -103,4 +121,5 @@ class AnswerDAO extends DAO
         }
     }
 }
+
 

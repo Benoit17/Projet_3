@@ -36,10 +36,25 @@ $app->match('/billet/{id}', function ($id, Request $request) use ($app) {
         }
         $commentFormView = $commentForm->createView();
     }
+    
+    $comments = $app['dao.comment']->findAllByBillet($id);
+    $answers = $app['dao.answer']->findAll();
+
+    return $app['twig']->render('billet.html.twig', array(
+        'billet' => $billet,
+        'comments' => $comments,
+        'answers' => $answers,
+        'commentForm' => $commentFormView));
+})->bind('billet');
+
+// Add a new answer
+$app->match('/comment/{id}/answer', function($id, Request $request) use ($app) {
+    $comment = $app['dao.comment']->find($id);
     $answerFormView = null;
     if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
-        // An user can answer
+        // An user can add comments
         $answer = new Answer();
+        $answer->setComment($comment);
         $user = $app['user'];
         $answer->setAuthor($user);
         $answerForm = $app['form.factory']->create(AnswerType::class, $answer);
@@ -50,14 +65,25 @@ $app->match('/billet/{id}', function ($id, Request $request) use ($app) {
         }
         $answerFormView = $answerForm->createView();
     }
-    $comments = $app['dao.comment']->findAllByBillet($id);
 
-    return $app['twig']->render('billet.html.twig', array(
-        'billet' => $billet,
-        'comments' => $comments,
-        'commentForm' => $commentFormView,
+    return $app['twig']->render('answer_form.html.twig', array(
+        'comment' => $comment,
         'answerForm' => $answerFormView));
-})->bind('billet');
+})->bind('comment_answer');
+
+// Edit an existing billet
+$app->match('/admin/billet/{id}/edit', function($id, Request $request) use ($app) {
+    $billet = $app['dao.billet']->find($id);
+    $billetForm = $app['form.factory']->create(BilletType::class, $billet);
+    $billetForm->handleRequest($request);
+    if ($billetForm->isSubmitted() && $billetForm->isValid()) {
+        $app['dao.billet']->save($billet);
+        $app['session']->getFlashBag()->add('success', 'The billet was successfully updated.');
+    }
+    return $app['twig']->render('billet_form.html.twig', array(
+        'title' => 'Edit billet',
+        'billetForm' => $billetForm->createView()));
+})->bind('admin_billet_edit');
 
 // Login form
 $app->get('/login', function(Request $request) use ($app) {

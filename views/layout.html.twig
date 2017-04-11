@@ -6,13 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="{{ asset('/lib/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('/css/projet_3.css') }}" rel="stylesheet">
-    <!-- TinyMCe -->
-    <script src='https://cloud.tinymce.com/stable/tinymce.min.js'></script>
-    <script>
-        tinymce.init({
-            selector: '#mytextarea'
-        });
-    </script>
     <title>Billet simple pour l'Alaska - {% block title %}{% endblock %}</title>
 </head>
 <body>
@@ -54,7 +47,10 @@
             </div>
         </div><!-- /.container -->
     </nav>
-    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
     <footer class="footer">
         <a href="https://github.com/Benoit17/Projet_3.git">Billet simple pour l'AlaskaBillet simple pour l'Alaska</a> - Jean Forteroche
     </footer>

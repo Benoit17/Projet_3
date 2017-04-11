@@ -5,11 +5,19 @@ namespace Projet_3\Domain;
 class Answer
 {
     /**
-     * Answer id.
+     * Answer parentid.
      *
      * @var integer
      */
     private $id;
+
+
+    /**
+     * Answer id.
+     *
+     * @var integer
+     */
+    private $parentid;
 
     /**
      * Answer author.
@@ -38,6 +46,15 @@ class Answer
 
     public function setId($id) {
         $this->id = $id;
+        return $this;
+    }
+
+    public function getParentId() {
+        return $this->parentid;
+    }
+
+    public function setParentId($parentid) {
+        $this->parentid = $parentid;
         return $this;
     }
 
