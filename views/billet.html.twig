@@ -11,16 +11,18 @@
     {% for comment in comments %}
         <div class="panel panel-default">
             <strong>{{ comment.author.username }}</strong> said : {{ comment.content }}<br>
-            <p class="text-right"><a href="{{ path('comment_answer', { 'id': comment.id }) }}"><button type="button" class="btn btn-primary"></span> Répondre </button></a></p>
+            <p class="text-right"><a href="{{ path('answer', { 'id': comment.id }) }}"><button type="button" class="btn btn-primary"></span> Répondre </button></a></p>
         </div>
+        <div class="answer">
         {% for answer in answers %}
             {% if comment.id == answer.comment.id %}
-                <div class="panel panel-default, answer">
+                <div class="panel panel-default">
                     <strong>{{ answer.author.username }}</strong> said : {{ answer.content }}<br>
-                    <p class="text-right"><a href="{{ path('comment_answer', { 'id': comment.id }) }}"><button type="button" class="btn btn-primary"> Répondre </button></a></p>
+                    <p class="text-right"><a href="{{ path('answer_answer', { 'id': comment.id, 'answerId': answer.answerId }) }}"><button type="button" class="btn btn-primary"> Répondre </button></a></p>
                 </div>
             {% endif %}
         {% endfor %}
+        </div>
     {% else %}
         No comments yet.
     {% endfor %}

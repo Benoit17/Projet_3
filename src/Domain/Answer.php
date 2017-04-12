@@ -9,7 +9,7 @@ class Answer
      *
      * @var integer
      */
-    private $id;
+    private $answerId;
 
 
     /**
@@ -17,7 +17,7 @@ class Answer
      *
      * @var integer
      */
-    private $parentid;
+    private $parentId;
 
     /**
      * Answer author.
@@ -40,21 +40,21 @@ class Answer
      */
     private $comment;
 
-    public function getId() {
-        return $this->id;
+    public function getAnswerId() {
+        return $this->answerId;
     }
 
-    public function setId($id) {
-        $this->id = $id;
+    public function setAnswerId($answerId) {
+        $this->answerId = $answerId;
         return $this;
     }
 
     public function getParentId() {
-        return $this->parentid;
+        return $this->parentId;
     }
 
-    public function setParentId($parentid) {
-        $this->parentid = $parentid;
+    public function setParentId($parentId) {
+        $this->parentId = $parentId + 1;
         return $this;
     }
 

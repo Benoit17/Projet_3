@@ -60,7 +60,8 @@ class AnswerDAO extends DAO
      */
     protected function buildDomainObject(array $row) {
         $answer = new Answer();
-        $answer->setId($row['answer_id']);
+        $answer->setAnswerId($row['answer_id']);
+        $answer->setParentId($row['parent_id']);
         $answer->setContent($row['answer_content']);
 
         if (array_key_exists('com_id', $row)) {
@@ -98,7 +99,22 @@ class AnswerDAO extends DAO
     }
 
     /**
-     * Saves a answer into the database.
+     * Returns a comment matching the supplied id.
+     *
+     * @param integer $answerId The answer id
+     *
+     * @return \Projet_3\Domain\Answer|throws an exception if no matching comment is found
+     */
+    public function find($answerId) {
+        $sql = "select * from t_answer where parent_id=?";
+        $row = $this->getDb()->fetchAssoc($sql, array($answerId));
+
+        if ($row)
+            return $this->buildDomainObject($row);
+    }
+
+    /**
+     * Saves an answer into the database.
      *
      * @param \Projet_3\Domain\Answer $answer The answer to save
      */
@@ -109,15 +125,38 @@ class AnswerDAO extends DAO
             'answer_content' => $answer->getContent()
         );
 
-        if ($answer->getId()) {
+        if ($answer->getAnswerId()) {
             // The answer has already been saved : update it
-            $this->getDb()->update('t_answer', $answerData, array('answer_id' => $answer->getId()));
+            $this->getDb()->update('t_answer', $answerData, array('answer_id' => $answer->getAnswerId()));
         } else {
             // The answer has never been saved : insert it
             $this->getDb()->insert('t_answer', $answerData);
             // Get the id of the newly created answer and set it on the entity.
-            $id = $this->getDb()->lastInsertId();
-            $answer->setId($id);
+            $answerId = $this->getDb()->lastInsertId();
+            $answer->setAnswerId($answerId);
+        }
+    }
+
+    /**
+     * Saves an answer into the database.
+     *
+     * @param \Projet_3\Domain\Answer $answer The answer to save
+     */
+    public function saveAnswer(Answer $answer) {
+        $answerData = array(
+            'com_id' => $answer->getComment()->getId(),
+            'parent_id' => $answer->getAnswerId(),
+            'usr_id' => $answer->getAuthor()->getId(),
+            'answer_content' => $answer->getContent()
+        );
+
+        if ($answer->getAnswerId()) {
+            // The answer has never been saved : insert it
+            $this->getDb()->insert('t_answer', $answerData);
+            // Get the id of the newly created answer and set it on the entity.
+
+            $answerId = $this->getDb()->lastInsertId();
+            $answer->setAnswerId($answerId);
         }
     }
 }

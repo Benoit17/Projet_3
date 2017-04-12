@@ -48,7 +48,7 @@ $app->match('/billet/{id}', function ($id, Request $request) use ($app) {
 })->bind('billet');
 
 // Add a new answer
-$app->match('/comment/{id}/answer', function($id, Request $request) use ($app) {
+$app->match('/answer/{id}', function($id, Request $request) use ($app) {
     $comment = $app['dao.comment']->find($id);
     $answerFormView = null;
     if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
@@ -69,7 +69,34 @@ $app->match('/comment/{id}/answer', function($id, Request $request) use ($app) {
     return $app['twig']->render('answer_form.html.twig', array(
         'comment' => $comment,
         'answerForm' => $answerFormView));
-})->bind('comment_answer');
+})->bind('answer');
+
+// Answer in answer
+$app->match('/answer/{id}/{answerId}', function($id, $answerId, Request $request) use ($app) {
+    $comment = $app['dao.comment']->find($id);
+    $answer = $app['dao.answer']->find($answerId);
+    $answerFormView = null;
+    if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
+        // An user can add comments
+        $answer = new Answer();
+        $answer->setComment($comment);
+        $answer->setAnswerId($answerId);
+        $user = $app['user'];
+        $answer->setAuthor($user);
+        $answerForm = $app['form.factory']->create(AnswerType::class, $answer);
+        $answerForm->handleRequest($request);
+        if ($answerForm->isSubmitted() && $answerForm->isValid()) {
+            $app['dao.answer']->saveAnswer($answer);
+            $app['session']->getFlashBag()->add('success', 'Your comment was successfully added.');
+        }
+        $answerFormView = $answerForm->createView();
+    }
+
+    return $app['twig']->render('answer_form.html.twig', array(
+        'comment' => $comment,
+        'answer' => $answer,
+        'answerForm' => $answerFormView));
+})->bind('answer_answer');
 
 // Edit an existing billet
 $app->match('/admin/billet/{id}/edit', function($id, Request $request) use ($app) {
