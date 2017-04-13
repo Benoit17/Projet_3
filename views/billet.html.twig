@@ -9,20 +9,17 @@
 
     <h3>Comments</h3>
     {% for comment in comments %}
+        {% if comment.parentId == 0 %}
         <div class="panel panel-default">
             <strong>{{ comment.author.username }}</strong> said : {{ comment.content }}<br>
-            <p class="text-right"><a href="{{ path('answer', { 'id': comment.id }) }}"><button type="button" class="btn btn-primary"></span> Répondre </button></a></p>
+            <p class="text-right"><a href="{{ path('answer', { 'billetId': billet.billetId, 'commentId': comment.commentId }) }}"><button type="button" class="btn btn-primary"></span> Répondre </button></a></p>
         </div>
-        <div class="answer">
-        {% for answer in answers %}
-            {% if comment.id == answer.comment.id %}
-                <div class="panel panel-default">
-                    <strong>{{ answer.author.username }}</strong> said : {{ answer.content }}<br>
-                    <p class="text-right"><a href="{{ path('answer_answer', { 'id': comment.id, 'answerId': answer.answerId }) }}"><button type="button" class="btn btn-primary"> Répondre </button></a></p>
-                </div>
-            {% endif %}
-        {% endfor %}
-        </div>
+        {% else %}
+            <div class="panel panel-default answer">
+                <strong>{{ comment.author.username }}</strong> said : {{ comment.content }}<br>
+                <p class="text-right"><a href="{{ path('answer', { 'billetId': billet.billetId, 'commentId': comment.commentId }) }}"><button type="button" class="btn btn-primary"></span> Répondre </button></a></p>
+            </div>
+        {% endif %}
     {% else %}
         No comments yet.
     {% endfor %}

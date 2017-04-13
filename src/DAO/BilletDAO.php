@@ -31,14 +31,14 @@ class BilletDAO extends DAO
      *
      * @return \Projet_3\Domain\Billet|throws an exception if no matching billet is found
      */
-    public function find($id) {
+    public function find($billetId) {
         $sql = "select * from t_billet where billet_id=?";
-        $row = $this->getDb()->fetchAssoc($sql, array($id));
+        $row = $this->getDb()->fetchAssoc($sql, array($billetId));
 
         if ($row)
             return $this->buildDomainObject($row);
         else
-            throw new \Exception("No billet matching id " . $id);
+            throw new \Exception("No billet matching id " . $billetId);
     }
 
     /**
@@ -49,7 +49,7 @@ class BilletDAO extends DAO
      */
     protected function buildDomainObject(array $row) {
         $billet = new Billet();
-        $billet->setId($row['billet_id']);
+        $billet->setBilletId($row['billet_id']);
         $billet->setTitle($row['billet_title']);
         $billet->setContent($row['billet_content']);
         return $billet;
@@ -66,26 +66,26 @@ class BilletDAO extends DAO
             'billet_content' => $billet->getContent(),
         );
 
-        if ($billet->getId()) {
+        if ($billet->getBilletId()) {
             // The billet has already been saved : update it
-            $this->getDb()->update('t_billet', $billetData, array('billet_id' => $billet->getId()));
+            $this->getDb()->update('t_billet', $billetData, array('billet_id' => $billet->getBilletId()));
         } else {
             // The billet has never been saved : insert it
             $this->getDb()->insert('t_billet', $billetData);
             // Get the id of the newly created billet and set it on the entity.
-            $id = $this->getDb()->lastInsertId();
-            $billet->setId($id);
+            $billetId = $this->getDb()->lastInsertId();
+            $billet->setBilletId($billetId);
         }
     }
 
     /**
      * Removes an billet from the database.
      *
-     * @param integer $id The billet id.
+     * @param integer $billetId The billet id.
      */
-    public function delete($id) {
+    public function delete($billetId) {
         // Delete the billet
-        $this->getDb()->delete('t_billet', array('billet_id' => $id));
+        $this->getDb()->delete('t_billet', array('billet_id' => $billetId));
     }
 
 }

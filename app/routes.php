@@ -9,7 +9,7 @@ use Projet_3\Form\Type\CommentType;
 use Projet_3\Form\Type\BilletType;
 use Projet_3\Form\Type\AnswerType;
 use Projet_3\Form\Type\UserType;
-use Projet_3\Form\Type\UserAdminType;
+use Projet_3\Form\Type\AdminUserType;
 
 // Home page
 $app->get('/', function () use ($app) {
@@ -19,8 +19,8 @@ $app->get('/', function () use ($app) {
 
 
 // Billet details with comments
-$app->match('/billet/{id}', function ($id, Request $request) use ($app) {
-    $billet = $app['dao.billet']->find($id);
+$app->match('/billet/{billetId}', function ($billetId, Request $request) use ($app) {
+    $billet = $app['dao.billet']->find($billetId);
     $commentFormView = null;
     if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
         // An user can add comments
@@ -37,13 +37,11 @@ $app->match('/billet/{id}', function ($id, Request $request) use ($app) {
         $commentFormView = $commentForm->createView();
     }
     
-    $comments = $app['dao.comment']->findAllByBillet($id);
-    $answers = $app['dao.answer']->findAll();
+    $comments = $app['dao.comment']->findAllByBillet($billetId);
 
     return $app['twig']->render('billet.html.twig', array(
         'billet' => $billet,
         'comments' => $comments,
-        'answers' => $answers,
         'commentForm' => $commentFormView));
 })->bind('billet');
 
@@ -72,45 +70,31 @@ $app->match('/answer/{id}', function($id, Request $request) use ($app) {
 })->bind('answer');
 
 // Answer in answer
-$app->match('/answer/{id}/{answerId}', function($id, $answerId, Request $request) use ($app) {
-    $comment = $app['dao.comment']->find($id);
-    $answer = $app['dao.answer']->find($answerId);
-    $answerFormView = null;
+$app->match('/answer/{billetId}/{commentId}', function($billetId, $commentId, Request $request) use ($app) {
+    $billet = $app['dao.billet']->find($billetId);
+    $comment = $app['dao.comment']->find($commentId);
+    $commentFormView = null;
     if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
         // An user can add comments
-        $answer = new Answer();
-        $answer->setComment($comment);
-        $answer->setAnswerId($answerId);
+        $comment = new Comment();
+        $comment->setBillet($billet);
+        $comment->setCommentId($commentId);
         $user = $app['user'];
-        $answer->setAuthor($user);
-        $answerForm = $app['form.factory']->create(AnswerType::class, $answer);
-        $answerForm->handleRequest($request);
-        if ($answerForm->isSubmitted() && $answerForm->isValid()) {
-            $app['dao.answer']->saveAnswer($answer);
+        $comment->setAuthor($user);
+        $commentForm = $app['form.factory']->create(CommentType::class, $comment);
+        $commentForm->handleRequest($request);
+        if ($commentForm->isSubmitted() && $commentForm->isValid()) {
+            $app['dao.comment']->saveAnswer($comment);
             $app['session']->getFlashBag()->add('success', 'Your comment was successfully added.');
         }
-        $answerFormView = $answerForm->createView();
+        $commentFormView = $commentForm->createView();
     }
 
-    return $app['twig']->render('answer_form.html.twig', array(
+    return $app['twig']->render('comment_form.html.twig', array(
+        'billet' => $billet,
         'comment' => $comment,
-        'answer' => $answer,
-        'answerForm' => $answerFormView));
-})->bind('answer_answer');
-
-// Edit an existing billet
-$app->match('/admin/billet/{id}/edit', function($id, Request $request) use ($app) {
-    $billet = $app['dao.billet']->find($id);
-    $billetForm = $app['form.factory']->create(BilletType::class, $billet);
-    $billetForm->handleRequest($request);
-    if ($billetForm->isSubmitted() && $billetForm->isValid()) {
-        $app['dao.billet']->save($billet);
-        $app['session']->getFlashBag()->add('success', 'The billet was successfully updated.');
-    }
-    return $app['twig']->render('billet_form.html.twig', array(
-        'title' => 'Edit billet',
-        'billetForm' => $billetForm->createView()));
-})->bind('admin_billet_edit');
+        'commentForm' => $commentFormView));
+})->bind('answer');
 
 // Login form
 $app->get('/login', function(Request $request) use ($app) {
@@ -123,6 +107,7 @@ $app->get('/login', function(Request $request) use ($app) {
 // Registration form
 $app->match('/registration', function(Request $request) use ($app) {
     $user = new User();
+    $role = 'ROLE_USER';
     $userForm = $app['form.factory']->create(UserType::class, $user);
     $userForm->handleRequest($request);
     if ($userForm->isSubmitted() && $userForm->isValid()) {
@@ -135,6 +120,8 @@ $app->match('/registration', function(Request $request) use ($app) {
         // compute the encoded password
         $password = $encoder->encodePassword($plainPassword, $user->getSalt());
         $user->setPassword($password);
+        // select default user role
+        $user->setRole($role);
         $app['dao.user']->save($user);
         $app['session']->getFlashBag()->add('success', 'Thank you and good read!.');
 
@@ -171,8 +158,8 @@ $app->match('/admin/billet/add', function(Request $request) use ($app) {
 })->bind('admin_billet_add');
 
 // Edit an existing billet
-$app->match('/admin/billet/{id}/edit', function($id, Request $request) use ($app) {
-    $billet = $app['dao.billet']->find($id);
+$app->match('/admin/billet/{billetId}/edit', function($billetId, Request $request) use ($app) {
+    $billet = $app['dao.billet']->find($billetId);
     $billetForm = $app['form.factory']->create(BilletType::class, $billet);
     $billetForm->handleRequest($request);
     if ($billetForm->isSubmitted() && $billetForm->isValid()) {
@@ -185,33 +172,33 @@ $app->match('/admin/billet/{id}/edit', function($id, Request $request) use ($app
 })->bind('admin_billet_edit');
 
 // Remove a billet
-$app->get('/admin/billet/{id}/delete', function($id, Request $request) use ($app) {
+$app->get('/admin/billet/{billetId}/delete', function($billetId, Request $request) use ($app) {
     // Delete all associated comments
-    $app['dao.comment']->deleteAllByBillet($id);
+    $app['dao.comment']->deleteAllByBillet($billetId);
     // Delete the billet
-    $app['dao.billet']->delete($id);
+    $app['dao.billet']->delete($billetId);
     $app['session']->getFlashBag()->add('success', 'The billet was successfully removed.');
     // Redirect to admin home page
     return $app->redirect($app['url_generator']->generate('admin'));
 })->bind('admin_billet_delete');
 
 // Edit an existing comment
-$app->match('/admin/comment/{id}/edit', function($id, Request $request) use ($app) {
-    $comment = $app['dao.comment']->find($id);
+$app->match('/admin/comment/{commentId}/edit', function($commentId, Request $request) use ($app) {
+    $comment = $app['dao.comment']->find($commentId);
     $commentForm = $app['form.factory']->create(CommentType::class, $comment);
     $commentForm->handleRequest($request);
     if ($commentForm->isSubmitted() && $commentForm->isValid()) {
         $app['dao.comment']->save($comment);
         $app['session']->getFlashBag()->add('success', 'The comment was successfully updated.');
     }
-    return $app['twig']->render('comment_form.html.twig', array(
+    return $app['twig']->render('admin_comment_form.html.twig', array(
         'title' => 'Edit comment',
         'commentForm' => $commentForm->createView()));
 })->bind('admin_comment_edit');
 
 // Remove a comment
-$app->get('/admin/comment/{id}/delete', function($id, Request $request) use ($app) {
-    $app['dao.comment']->delete($id);
+$app->get('/admin/comment/{commentId}/delete', function($commentId, Request $request) use ($app) {
+    $app['dao.comment']->delete($commentId);
     $app['session']->getFlashBag()->add('success', 'The comment was successfully removed.');
     // Redirect to admin home page
     return $app->redirect($app['url_generator']->generate('admin'));
@@ -220,9 +207,9 @@ $app->get('/admin/comment/{id}/delete', function($id, Request $request) use ($ap
 // Add a user in admin
 $app->match('/admin/user/add', function(Request $request) use ($app) {
     $user = new User();
-    $useradminForm = $app['form.factory']->create(UserAdminType::class, $user);
-    $useradminForm->handleRequest($request);
-    if ($useradminForm->isSubmitted() && $useradminForm->isValid()) {
+    $adminUserForm = $app['form.factory']->create(AdminUserType::class, $user);
+    $adminUserForm->handleRequest($request);
+    if ($adminUserForm->isSubmitted() && $adminUserForm->isValid()) {
         // generate a random salt value
         $salt = substr(md5(time()), 0, 23);
         $user->setSalt($salt);
@@ -235,17 +222,17 @@ $app->match('/admin/user/add', function(Request $request) use ($app) {
         $app['dao.user']->save($user);
         $app['session']->getFlashBag()->add('success', 'The user was successfully created.');
     }
-    return $app['twig']->render('useradmin_form.html.twig', array(
+    return $app['twig']->render('admin_user_form.html.twig', array(
         'title' => 'New user',
-        'useradminForm' => $useradminForm->createView()));
+        'adminUserForm' => $adminUserForm->createView()));
 })->bind('admin_user_add');
 
 // Edit an existing user
 $app->match('/admin/user/{id}/edit', function($id, Request $request) use ($app) {
     $user = $app['dao.user']->find($id);
-    $useradminForm = $app['form.factory']->create(UserType::class, $user);
-    $useradminForm->handleRequest($request);
-    if ($useradminForm->isSubmitted() && $useradminForm->isValid()) {
+    $adminUserForm = $app['form.factory']->create(AdminUserType::class, $user);
+    $adminUserForm->handleRequest($request);
+    if ($adminUserForm->isSubmitted() && $adminUserForm->isValid()) {
         $plainPassword = $user->getPassword();
         // find the encoder for the user
         $encoder = $app['security.encoder_factory']->getEncoder($user);
@@ -255,9 +242,9 @@ $app->match('/admin/user/{id}/edit', function($id, Request $request) use ($app) 
         $app['dao.user']->save($user);
         $app['session']->getFlashBag()->add('success', 'The user was successfully updated.');
     }
-    return $app['twig']->render('user_form.html.twig', array(
+    return $app['twig']->render('admin_user_form.html.twig', array(
         'title' => 'Edit user',
-        'useradminForm' => $useradminForm->createView()));
+        'adminUserForm' => $adminUserForm->createView()));
 })->bind('admin_user_edit');
 
 // Remove a user

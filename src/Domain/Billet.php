@@ -9,7 +9,7 @@ class Billet
      *
      * @var integer
      */
-    private $id;
+    private $billetId;
 
     /**
      * Billet title.
@@ -25,12 +25,12 @@ class Billet
      */
     private $content;
 
-    public function getId() {
-        return $this->id;
+    public function getBilletId() {
+        return $this->billetId;
     }
 
-    public function setId($id) {
-        $this->id = $id;
+    public function setBilletId($billetId) {
+        $this->billetId = $billetId;
         return $this;
     }
 

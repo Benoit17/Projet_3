@@ -9,7 +9,14 @@ class Comment
      *
      * @var integer
      */
-    private $id;
+    private $commentId;
+
+    /**
+     * Answer id.
+     *
+     * @var integer
+     */
+    private $parentId;
 
     /**
      * Comment author.
@@ -32,12 +39,21 @@ class Comment
      */
     private $billet;
 
-    public function getId() {
-        return $this->id;
+    public function getCommentId() {
+        return $this->commentId;
     }
 
-    public function setId($id) {
-        $this->id = $id;
+    public function setCommentId($commentId) {
+        $this->commentId = $commentId;
+        return $this;
+    }
+
+    public function getParentId() {
+        return $this->parentId;
+    }
+
+    public function setParentId($parentId) {
+        $this->parentId = $parentId;
         return $this;
     }
 

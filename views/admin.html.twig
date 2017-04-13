@@ -33,13 +33,13 @@
                         </thead>
                         {% for billet in billets %}
                             <tr>
-                                <td><a class="billetTitle" href="{{ path('billet', { 'id': billet.id }) }}">{{ billet.title }}</a></td>
+                                <td><a class="billetTitle" href="{{ path('billet', { 'billetId': billet.billetId }) }}">{{ billet.title }}</a></td>
                                 <td>{{ billet.content | truncate(60) }}</td>
                                 <td>
-                                    <a href="{{ path('admin_billet_edit', { 'id': billet.id }) }}" class="btn btn-info btn-xs" title="Edit"><span class="glyphicon glyphicon-edit"></span></a>
-                                    <button type="button" class="btn btn-danger btn-xs" title="Delete" data-toggle="modal" data-target="#billetDialog{{ billet.id }}"><span class="glyphicon glyphicon-remove"></span>
+                                    <a href="{{ path('admin_billet_edit', { 'billetId': billet.billetId }) }}" class="btn btn-info btn-xs" title="Edit"><span class="glyphicon glyphicon-edit"></span></a>
+                                    <button type="button" class="btn btn-danger btn-xs" title="Delete" data-toggle="modal" data-target="#billetDialog{{ billet.billetId }}"><span class="glyphicon glyphicon-remove"></span>
                                     </button>
-                                    <div class="modal fade" id="billetDialog{{ billet.id }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                    <div class="modal fade" id="billetDialog{{ billet.billetId }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -51,7 +51,7 @@
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                                                    <a href="{{ path('admin_billet_delete', { 'id': billet.id }) }}" class="btn btn-danger">Confirm</a>
+                                                    <a href="{{ path('admin_billet_delete', { 'billetId': billet.billetId }) }}" class="btn btn-danger">Confirm</a>
                                                 </div>
                                             </div><!-- /.modal-content -->
                                         </div><!-- /.modal-dialog -->
@@ -80,14 +80,14 @@
                         </thead>
                         {% for comment in comments %}
                             <tr>
-                                <td><a class="billetTitle" href="{{ path('billet', { 'id': comment.billet.id }) }}">{{ comment.billet.title }}</a></td>
+                                <td><a class="billetTitle" href="{{ path('billet', { 'billetId': comment.billet.billetId }) }}">{{ comment.billet.title }}</a></td>
                                 <td>{{ comment.author.username }}</td>
                                 <td>{{ comment.content | truncate(60) }}</td>
                                 <td>
-                                    <a href="{{ path('admin_comment_edit', { 'id': comment.id }) }}" class="btn btn-info btn-xs" title="Edit"><span class="glyphicon glyphicon-edit"></span></a>
-                                    <button type="button" class="btn btn-danger btn-xs" title="Delete" data-toggle="modal" data-target="#commentDialog{{ comment.id }}"><span class="glyphicon glyphicon-remove"></span>
+                                    <a href="{{ path('admin_comment_edit', { 'commentId': comment.commentId }) }}" class="btn btn-info btn-xs" title="Edit"><span class="glyphicon glyphicon-edit"></span></a>
+                                    <button type="button" class="btn btn-danger btn-xs" title="Delete" data-toggle="modal" data-target="#commentDialog{{ comment.commentId }}"><span class="glyphicon glyphicon-remove"></span>
                                     </button>
-                                    <div class="modal fade" id="commentDialog{{ comment.id }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                    <div class="modal fade" id="commentDialog{{ comment.commentId }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -99,7 +99,7 @@
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                                                    <a href="{{ path('admin_comment_delete', { 'id': comment.id }) }}" class="btn btn-danger">Confirm</a>
+                                                    <a href="{{ path('admin_comment_delete', { 'commentId': comment.commentId }) }}" class="btn btn-danger">Confirm</a>
                                                 </div>
                                             </div><!-- /.modal-content -->
                                         </div><!-- /.modal-dialog -->

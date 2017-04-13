@@ -37,7 +37,7 @@ class CommentDAO extends DAO
 
         // billet_id is not selected by the SQL query
         // The billet won't be retrieved during domain objet construction
-        $sql = "select com_id, com_content, usr_id from t_comment where billet_id=? order by com_id";
+        $sql = "select com_id, com_content, parent_id, usr_id from t_comment where billet_id=? order by com_id";
         $result = $this->getDb()->fetchAll($sql, array($billetId));
 
         // Convert query result to an array of domain objects
@@ -53,14 +53,15 @@ class CommentDAO extends DAO
     }
 
     /**
-     * Creates an Comment object based on a DB row.
+     * Creates a Comment object based on a DB row.
      *
      * @param array $row The DB row containing Comment data.
      * @return \Projet_3\Domain\Comment
      */
     protected function buildDomainObject(array $row) {
         $comment = new Comment();
-        $comment->setId($row['com_id']);
+        $comment->setCommentId($row['com_id']);
+        $comment->setParentId($row['parent_id']);
         $comment->setContent($row['com_content']);
 
         if (array_key_exists('billet_id', $row)) {
@@ -87,20 +88,43 @@ class CommentDAO extends DAO
      */
     public function save(Comment $comment) {
         $commentData = array(
-            'billet_id' => $comment->getBillet()->getId(),
+            'billet_id' => $comment->getBillet()->getBilletId(),
             'usr_id' => $comment->getAuthor()->getId(),
             'com_content' => $comment->getContent()
         );
 
-        if ($comment->getId()) {
+        if ($comment->getCommentId()) {
             // The comment has already been saved : update it
-            $this->getDb()->update('t_comment', $commentData, array('com_id' => $comment->getId()));
+            $this->getDb()->update('t_comment', $commentData, array('com_id' => $comment->getCommentId()));
         } else {
             // The comment has never been saved : insert it
             $this->getDb()->insert('t_comment', $commentData);
             // Get the id of the newly created comment and set it on the entity.
-            $id = $this->getDb()->lastInsertId();
-            $comment->setId($id);
+            $commentId = $this->getDb()->lastInsertId();
+            $comment->setCommentId($commentId);
+        }
+    }
+
+    /**
+     * Saves an answer into the database.
+     *
+     * @param \Projet_3\Domain\Comment $comment The answer to save
+     */
+    public function saveAnswer(Comment $comment) {
+        $commentData = array(
+            'billet_id' => $comment->getBillet()->getBilletId(),
+            'parent_id' => $comment->getCommentId(),
+            'usr_id' => $comment->getAuthor()->getId(),
+            'com_content' => $comment->getContent()
+        );
+
+        if ($comment->getCommentId()) {
+            // The answer has never been saved : insert it
+            $this->getDb()->insert('t_comment', $commentData);
+            // Get the id of the newly created answer and set it on the entity.
+
+            $commentId = $this->getDb()->lastInsertId();
+            $comment->setCommentId($commentId);
         }
     }
 
@@ -116,8 +140,8 @@ class CommentDAO extends DAO
         // Convert query result to an array of domain objects
         $entities = array();
         foreach ($result as $row) {
-            $id = $row['com_id'];
-            $entities[$id] = $this->buildDomainObject($row);
+            $commentId = $row['com_id'];
+            $entities[$commentId] = $this->buildDomainObject($row);
         }
         return $entities;
     }
@@ -134,28 +158,28 @@ class CommentDAO extends DAO
     /**
      * Returns a comment matching the supplied id.
      *
-     * @param integer $id The comment id
+     * @param integer $commentid The comment id
      *
      * @return \Projet_3\Domain\Comment|throws an exception if no matching comment is found
      */
-    public function find($id) {
+    public function find($commentId) {
         $sql = "select * from t_comment where com_id=?";
-        $row = $this->getDb()->fetchAssoc($sql, array($id));
+        $row = $this->getDb()->fetchAssoc($sql, array($commentId));
 
         if ($row)
             return $this->buildDomainObject($row);
         else
-            throw new \Exception("No comment matching id " . $id);
+            throw new \Exception("No comment matching id " . $commentId);
     }
 
     /**
      * Removes a comment from the database.
      *
-     * @param @param integer $id The comment id
+     * @param @param integer $commentId The comment id
      */
-    public function delete($id) {
+    public function delete($commentId) {
         // Delete the comment
-        $this->getDb()->delete('t_comment', array('com_id' => $id));
+        $this->getDb()->delete('t_comment', array('com_id' => $commentId));
     }
 
     /**
