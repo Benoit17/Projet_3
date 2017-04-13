@@ -41,7 +41,7 @@ class User implements UserInterface
      * @var string
      */
     private $role;
-
+    
     public function getId() {
         return $this->id;
     }
@@ -113,4 +113,6 @@ class User implements UserInterface
     public function eraseCredentials() {
         // Nothing to do here
     }
+    
+    
 }

@@ -10,3 +10,6 @@ $app['db.options'] = array(
     'user'     => 'projet_3_user',
     'password' => 'secret',
 );
+
+// define log level
+$app['monolog.level'] = 'WARNING';

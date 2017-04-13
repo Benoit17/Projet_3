@@ -41,13 +41,35 @@ class CommentDAO extends DAO
         $result = $this->getDb()->fetchAll($sql, array($billetId));
 
         // Convert query result to an array of domain objects
-        $comments = array();
+        $comments_by_id = [];
         foreach ($result as $row) {
             $comId = $row['com_id'];
             $comment = $this->buildDomainObject($row);
             // The associated billet is defined for the constructed comment
             $comment->setBillet($billet);
-            $comments[$comId] = $comment;
+            $comments_by_id[$comId] = $comment;
+        }
+        return $comments_by_id;
+    }
+
+    /**
+     * Permet de récupérer les commentaires avec les enfants
+     * @param $billetId
+     * @param bool $unset_children Doit-t-on supprimer les commentaire qui sont des enfants des résultats ?
+     * @return array
+     */
+    public function findAllWithChildren($billetId, $unset_children = true)
+    {
+        // On a besoin de 2 variables
+        // comments_by_id ne sera jamais modifié alors que comments
+        $comments = $comments_by_id = $this->findAllByBillet($billetId);
+        foreach ($comments as $commentId => $comment) {
+            if ($comment->getParentId() != 0) {
+                $comments_by_id[$comment->getParentId()]->children[] = $comment;
+                if ($unset_children) {
+                    unset($comments[$commentId]);
+                }
+            }
         }
         return $comments;
     }

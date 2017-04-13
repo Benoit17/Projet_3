@@ -20,3 +20,8 @@ body {
 .answer{
     margin-left: 50px;
 }
+
+#errorPanel {
+    padding-top: 30px;
+    padding-bottom: 10px;
+}
