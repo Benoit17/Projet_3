@@ -58,7 +58,7 @@ class HomeController
 
     // Add a new Answer (New)
     /**
-     * Billet details controller.
+     * Answer controller.
      *
      * @param integer $billetId Billet id
      * @param integer $commentId Comment id
@@ -92,6 +92,25 @@ class HomeController
             'commentForm' => $commentFormView));
     }
 
+    // Add a reporting (New)
+    /**
+     * Reporting controller.
+     *
+     * @param integer $commentId Comment id
+     * @param Application $app Silex application
+     */
+    public function reportingCommentAction($commentId, Application $app)
+    {
+        if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
+            $comment = new Comment();
+            $comment->setCommentId($commentId);
+                $app['dao.comment']->saveReporting($comment);
+                $app['session']->getFlashBag()->add('success', 'Your reporting was successfully send.');
+            }
+        return $app->redirect($app['url_generator']->generate('home'));
+    }
+
+    // Login form
     /**
      * User login controller.
      *

@@ -12,6 +12,10 @@ $app->match('/billet/{billetId}', "Projet_3\Controller\HomeController::billetAct
 $app->match('/answer/{billetId}/{commentId}', "Projet_3\Controller\HomeController::addAnswerAction")
     ->bind('answer');
 
+// Reporting a comment
+$app->get('/billet/{commentId}/reporting', "Projet_3\Controller\HomeController::reportingCommentAction")
+    ->bind('reporting');
+
 // Login form
 $app->get('/login', "Projet_3\Controller\HomeController::loginAction")
     ->bind('login');

@@ -41,7 +41,7 @@ class AdminController {
             $app['dao.billet']->save($billet);
             $app['session']->getFlashBag()->add('success', 'The billet was successfully created.');
         }
-        return $app['twig']->render('billet_form.html.twig', array(
+        return $app['twig']->render('admin_billet_form.html.twig', array(
             'title' => 'New billet',
             'billetForm' => $billetForm->createView()));
     }
@@ -61,7 +61,7 @@ class AdminController {
             $app['dao.billet']->save($billet);
             $app['session']->getFlashBag()->add('success', 'The billet was successfully updated.');
         }
-        return $app['twig']->render('billet_form.html.twig', array(
+        return $app['twig']->render('admin_billet_form.html.twig', array(
             'title' => 'Edit billet',
             'billetForm' => $billetForm->createView()));
     }

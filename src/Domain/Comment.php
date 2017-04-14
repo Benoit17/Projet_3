@@ -39,6 +39,13 @@ class Comment
      */
     private $billet;
 
+    /**
+     * Reporting id.
+     *
+     * @var integer
+     */
+    private $reportingId;
+
     public function getCommentId() {
         return $this->commentId;
     }
@@ -81,6 +88,15 @@ class Comment
 
     public function setBillet(Billet $billet) {
         $this->billet = $billet;
+        return $this;
+    }
+
+    public function getReportingId() {
+        return $this->reportingId;
+    }
+
+    public function setReportingId($reportingId) {
+        $this->reportingId = $reportingId;
         return $this;
     }
 }

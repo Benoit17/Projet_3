@@ -23,6 +23,12 @@
                 }}) }}
             </div>
         </div>
+        <script src='https://cloud.tinymce.com/stable/tinymce.min.js'></script>
+        <script>
+            tinymce.init({
+                selector: 'textarea'
+            });
+        </script>
         <div class="form-group">
             {{ form_label(billetForm.content, null, { 'label_attr':  {
                 'class': 'col-sm-4 control-label'

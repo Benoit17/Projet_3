@@ -21,6 +21,16 @@ body {
     margin-left: 50px;
 }
 
+.signalButton {
+    background-color: #b92c28;
+    border-color: #b92c28;
+}
+
+.signalButton:hover {
+    background-color: #880000;
+    border-color: #880000;
+}
+
 #errorPanel {
     padding-top: 30px;
     padding-bottom: 10px;
