@@ -37,7 +37,7 @@ class CommentDAO extends DAO
 
         // billet_id is not selected by the SQL query
         // The billet won't be retrieved during domain objet construction
-        $sql = "select com_id, com_content, parent_id, usr_id, reporting_id from t_comment where billet_id=? order by com_id";
+        $sql = "select com_id, com_content, parent_id, usr_id, com_reporting, com_depth from t_comment where billet_id=? order by com_id";
         $result = $this->getDb()->fetchAll($sql, array($billetId));
 
         // Convert query result to an array of domain objects
@@ -50,28 +50,6 @@ class CommentDAO extends DAO
             $comments_by_id[$comId] = $comment;
         }
         return $comments_by_id;
-    }
-
-    /**
-     * Permet de récupérer les commentaires avec les enfants
-     * @param $billetId
-     * @param bool $unset_children Doit-t-on supprimer les commentaire qui sont des enfants des résultats ?
-     * @return array
-     */
-    public function findAllWithChildren($billetId, $unset_children = true)
-    {
-        // On a besoin de 2 variables
-        // comments_by_id ne sera jamais modifié alors que comments
-        $comments = $comments_by_id = $this->findAllByBillet($billetId);
-        foreach ($comments as $commentId => $comment) {
-            if ($comment->getParentId() != 0) {
-                $comments_by_id[$comment->getParentId()]->children[] = $comment;
-                if ($unset_children) {
-                    unset($comments[$commentId]);
-                }
-            }
-        }
-        return $comments;
     }
 
     /**
@@ -110,23 +88,6 @@ class CommentDAO extends DAO
     }
 
     /**
-     * Returns a comment matching the supplied id.
-     *
-     * @param integer $commentid The comment id
-     *
-     * @return \Projet_3\Domain\Comment|throws an exception if no matching comment is found
-     */
-    public function findByReportingId($reportingId) {
-        $sql = "select reporting_id from t_comment where reporting_id=?";
-        $row = $this->getDb()->fetchAssoc($sql, array($reportingId));
-
-        if ($row)
-            return $this->buildDomainObject($row);
-        else
-            throw new \Exception("No comment matching id " . $reportingId);
-    }
-
-    /**
      * Creates a Comment object based on a DB row.
      *
      * @param array $row The DB row containing Comment data.
@@ -135,9 +96,10 @@ class CommentDAO extends DAO
     protected function buildDomainObject(array $row) {
         $comment = new Comment();
         $comment->setCommentId($row['com_id']);
-        $comment->setParentId($row['parent_id']);
-        $comment->setReportingId($row['reporting_id']);
         $comment->setContent($row['com_content']);
+        $comment->setParentId($row['parent_id']);
+        $comment->setReporting($row['com_reporting']);
+        $comment->setDepth($row['com_depth']);
 
         if (array_key_exists('billet_id', $row)) {
             // Find and set the associated billet
@@ -157,15 +119,17 @@ class CommentDAO extends DAO
     }
 
     /**
-     * Saves a comment into the database.
+     * Save a comment into the database.
      *
      * @param \Projet_3\Domain\Comment $comment The comment to save
      */
     public function save(Comment $comment) {
         $commentData = array(
             'billet_id' => $comment->getBillet()->getBilletId(),
+            'com_content' => $comment->getContent(),
             'usr_id' => $comment->getAuthor()->getId(),
-            'com_content' => $comment->getContent()
+            'parent_id' => 0,
+            'com_depth' => 0,
         );
 
         if ($comment->getCommentId()) {
@@ -181,7 +145,7 @@ class CommentDAO extends DAO
     }
 
     /**
-     * Saves an answer into the database.
+     * Save an answer into the database.
      *
      * @param \Projet_3\Domain\Comment $comment The answer to save
      */
@@ -190,7 +154,8 @@ class CommentDAO extends DAO
             'billet_id' => $comment->getBillet()->getBilletId(),
             'parent_id' => $comment->getCommentId(),
             'usr_id' => $comment->getAuthor()->getId(),
-            'com_content' => $comment->getContent()
+            'com_content' => $comment->getContent(),
+            'com_depth' => $comment->getDepth()+1,
         );
 
         if ($comment->getCommentId()) {
@@ -204,13 +169,13 @@ class CommentDAO extends DAO
     }
 
     /**
-     * Save signal into the database.
+     * Save reporting into the database.
      *
      * @param \Projet_3\Domain\Comment $comment The answer to save
      */
     public function saveReporting(Comment $comment) {
         $commentData = array(
-            'reporting_id'=> $comment->getCommentId(),
+            'com_reporting'=> $comment->getCommentId(),
         );
             // The comment has already been saved : update it
             $this->getDb()->update('t_comment', $commentData, array('com_id' => $comment->getCommentId()));

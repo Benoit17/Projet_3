@@ -37,6 +37,7 @@ class HomeController
         if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
             // A user is fully authenticated : he can add comments
             $comment = new Comment();
+            $billet = $app['dao.billet']->find($billetId);
             $comment->setBillet($billet);
             $user = $app['user'];
             $comment->setAuthor($user);
@@ -56,16 +57,17 @@ class HomeController
             'commentForm' => $commentFormView));
     }
 
-    // Add a new Answer (New)
+    // Add a new Answer
     /**
      * Answer controller.
      *
      * @param integer $billetId Billet id
      * @param integer $commentId Comment id
+     * @param integer $parentId Comment id
      * @param Request $request Incoming request
      * @param Application $app Silex application
      */
-    public function addAnswerAction($billetId, $commentId, Request $request, Application $app)
+    public function addAnswerAction($billetId, $commentId, $parentId, Request $request, Application $app)
     {
         $billet = $app['dao.billet']->find($billetId);
         $comment = $app['dao.comment']->find($commentId);
@@ -73,10 +75,20 @@ class HomeController
         if ($app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_FULLY')) {
             // An user can add comments
             $comment = new Comment();
-            $comment->setBillet($billet);
+            if ($parentId != 0)
+            {
+                $commentParent = $app['dao.comment']->find($parentId);
+                $comment->setDepth($commentParent->getDepth()+1);
+                $comment->setParentId($commentParent);
+            }
+            else
+            {
+                $comment->setDepth(0);
+            }
             $comment->setCommentId($commentId);
             $user = $app['user'];
             $comment->setAuthor($user);
+            $comment->setBillet($billet);
             $commentForm = $app['form.factory']->create(CommentType::class, $comment);
             $commentForm->handleRequest($request);
             if ($commentForm->isSubmitted() && $commentForm->isValid()) {
@@ -92,7 +104,7 @@ class HomeController
             'commentForm' => $commentFormView));
     }
 
-    // Add a reporting (New)
+    // Reporting
     /**
      * Reporting controller.
      *

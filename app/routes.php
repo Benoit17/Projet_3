@@ -9,7 +9,7 @@ $app->match('/billet/{billetId}', "Projet_3\Controller\HomeController::billetAct
     ->bind('billet');
 
 // Add an answer
-$app->match('/answer/{billetId}/{commentId}', "Projet_3\Controller\HomeController::addAnswerAction")
+$app->match('/answer/{billetId}/{commentId}/{parentId}', "Projet_3\Controller\HomeController::addAnswerAction")
     ->bind('answer');
 
 // Reporting a comment

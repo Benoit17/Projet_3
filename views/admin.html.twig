@@ -128,7 +128,7 @@
                         </tr>
                         </thead>
                         {% for comment in comments %}
-                            {% if comment.reportingId != 0 %}
+                            {% if comment.reporting != 0 %}
                                 <tr>
                                     <td><a class="billetTitle" href="{{ path('billet', { 'billetId': comment.billet.billetId }) }}">{{ comment.billet.title }}</a></td>
                                     <td>{{ comment.author.username }}</td>

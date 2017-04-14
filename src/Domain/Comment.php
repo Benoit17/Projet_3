@@ -44,7 +44,14 @@ class Comment
      *
      * @var integer
      */
-    private $reportingId;
+    private $reporting;
+
+    /**
+     * Reporting id.
+     *
+     * @var integer
+     */
+    private $depth;
 
     public function getCommentId() {
         return $this->commentId;
@@ -91,12 +98,21 @@ class Comment
         return $this;
     }
 
-    public function getReportingId() {
-        return $this->reportingId;
+    public function getReporting() {
+        return $this->reporting;
     }
 
-    public function setReportingId($reportingId) {
-        $this->reportingId = $reportingId;
+    public function setReporting($reporting) {
+        $this->reporting = $reporting;
+        return $this;
+    }
+
+    public function getDepth() {
+        return $this->depth;
+    }
+
+    public function setDepth($depth) {
+        $this->depth = $depth;
         return $this;
     }
 }

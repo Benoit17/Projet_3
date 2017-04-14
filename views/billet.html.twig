@@ -9,40 +9,12 @@
 
     <h3>Comments</h3>
     {% for comment in comments %}
-        {% if comment.parentId == 0 %}
-        <div class="panel panel-default">
-            <strong>{{ comment.author.username }}</strong> said : {{ comment.content }}<br>
-            <p class="text-right">
-                {% if app.user and is_granted('IS_AUTHENTICATED_FULLY') %}
-                <button type="button" class="btn btn-danger" title="Reporting" data-toggle="modal" data-target="#commentDialog{{ comment.commentId }}"> Signaler </button>
-                <a href="{{ path('answer', { 'billetId': billet.billetId, 'commentId': comment.commentId }) }}"><button type="button" class="btn btn-primary"> Répondre </button></a>
-                {% endif %}
-            </p>
-            <div class="modal fade" id="commentDialog{{ comment.commentId }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title" id="myModalLabel">Confirmation needed</h4>
-                        </div>
-                        <div class="modal-body">
-                            Do you really want to report this comment ?
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <a href="{{ path('reporting', { 'commentId': comment.commentId }) }}" class="btn btn-danger">Confirm</a>
-                        </div>
-                    </div><!-- /.modal-content -->
-                </div><!-- /.modal-dialog -->
-            </div><!-- /.modal -->
-        </div>
-        {% else %}
-            <div class="panel panel-default answer">
+            <div class="panel panel-default">
                 <strong>{{ comment.author.username }}</strong> said : {{ comment.content }}<br>
                 <p class="text-right">
                     {% if app.user and is_granted('IS_AUTHENTICATED_FULLY') %}
-                    <button type="button" class="btn btn-danger"> Signaler </button>
-                    <a href="{{ path('answer', { 'billetId': billet.billetId, 'commentId': comment.commentId }) }}"><button type="button" class="btn btn-primary"> Répondre </button></a>
+                    <button type="button" class="btn btn-danger" title="Reporting" data-toggle="modal" data-target="#commentDialog{{ comment.commentId }}"> Signaler </button>
+                    <a href="{{ path('answer', { 'billetId': billet.billetId, 'commentId': comment.commentId, 'parentId': comment.parentId }) }}"><button type="button" class="btn btn-primary"> Répondre </button></a>
                     {% endif %}
                 </p>
                 <div class="modal fade" id="commentDialog{{ comment.commentId }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -63,7 +35,6 @@
                     </div><!-- /.modal-dialog -->
                 </div><!-- /.modal -->
             </div>
-        {% endif %}
     {% else %}
         No comments yet.
     {% endfor %}
